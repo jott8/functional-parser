@@ -1,4 +1,4 @@
-module Parser where
+module Main where
 
 import Control.Applicative ( Alternative (..) )
 import Control.Monad       ( ap )
