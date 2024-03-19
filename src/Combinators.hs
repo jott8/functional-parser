@@ -1,4 +1,4 @@
-module Main where
+module Combinators where
 
 import Control.Applicative ( Alternative (..) )
 import Control.Monad       ( ap )
