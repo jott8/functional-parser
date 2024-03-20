@@ -2,14 +2,14 @@ module Combinators where
 
 import Control.Applicative ( Alternative (..) )
 import Control.Monad       ( ap )
-import Data.Char           ( isDigit, isLower, isUpper, isSpace )
+import Data.Char           ( isAlpha, isDigit, isLower, isUpper, isSpace )
 
 newtype Parser a = Parser { parse :: String -> Maybe(a, String) }
 
 item :: Parser Char
 item = Parser $ \input -> case input of
-                            ""     -> Nothing
-                            (x:xs) -> Just (x,xs)
+    ""     -> Nothing
+    (x:xs) -> Just (x,xs)
 
 instance Monad Parser where
     return :: a -> Parser a
@@ -39,19 +39,40 @@ instance Alternative Parser where
     p1 <|> p2 = Parser $ \input -> do parse p1 input <|> parse p2 input
 
 satisfy :: (Char -> Bool) -> Parser Char
-satisfy p = do { x <- item; if p x then return x else empty }
+satisfy p = do 
+    x <- item
+    if p x then return x else empty
 
 munch :: (Char -> Bool) -> Parser String
 munch = many . satisfy
 
+sepBy :: Parser a -> Parser b -> Parser [b]
+sepBy sep p = (:) <$> p <*> many (sep >> p) <|> return []
+
+between :: Parser open -> Parser close -> Parser a -> Parser a
+between = undefined
+
+letter :: Parser Char
+letter = satisfy isAlpha
+
+word :: Parser String
+word = some letter
+
 char :: Char -> Parser Char
 char = satisfy . (==)
 
-string :: String -> Parser String
-string = traverse char
+string :: Parser String
+string = undefined
+
+string' :: String -> Parser String
+string' = traverse char
 
 stringLit :: Parser String
-stringLit = char '"' *> munch (/= '"') <* char '"'
+stringLit = do
+    char '"' 
+    xs <- munch (/= '"') 
+    char '"'
+    return xs
 
 stringEsc :: Parser String
 stringEsc = undefined
@@ -65,5 +86,34 @@ lower = satisfy isLower
 digit :: Parser Char
 digit = satisfy isDigit
 
+nat :: Parser Int
+nat = do 
+    ds <- some digit
+    return (read ds)
+
+fl :: Parser Float
+fl = undefined
+
+int :: Parser Int
+int = do 
+    char '-'
+    n <- nat
+    return (-n)
+    <|> nat
+
 ws :: Parser Char
 ws = satisfy isSpace
+
+space :: Parser ()
+space = do
+    many ws
+    return ()
+
+token :: Parser a -> Parser a
+token p = do
+    space
+    v <- p
+    space
+    return v
+
+-- NEEDED: floats, strings with white-spaces, escaped strings, UTF-8 support
