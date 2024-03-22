@@ -56,7 +56,7 @@ endBy p end = many $ do
     return xs
 
 noneOf :: String -> Parser Char
-noneOf cs = satisfy (\c -> not (c `elem` cs))
+noneOf cs = satisfy (`notElem` cs)
 
 between :: Parser open -> Parser close -> Parser a -> Parser a
 between = undefined
