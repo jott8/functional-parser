@@ -46,8 +46,17 @@ satisfy p = do
 munch :: (Char -> Bool) -> Parser String
 munch = many . satisfy
 
-sepBy :: Parser a -> Parser b -> Parser [b]
-sepBy sep p = (:) <$> p <*> many (sep >> p) <|> return []
+sepBy :: Parser a -> Parser b -> Parser [a]
+sepBy p sep = (:) <$> p <*> many (sep >> p) <|> return []
+
+endBy :: Parser a -> Parser b -> Parser [a]
+endBy p end = many $ do
+    xs <- p
+    end
+    return xs
+
+noneOf :: String -> Parser Char
+noneOf cs = satisfy (\c -> not (c `elem` cs))
 
 between :: Parser open -> Parser close -> Parser a -> Parser a
 between = undefined
